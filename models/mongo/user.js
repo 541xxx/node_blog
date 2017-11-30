@@ -9,6 +9,7 @@ const SALT = require('../../cipher').PASSWORD_SALT;
 const UserSchema = new Schema({
   name: {type: String, required: true},
   age: {type: Number},
+  avatar: {type: String},
   password: String,
   phoneNumber: String
 });

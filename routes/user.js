@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/mongo/user')
+const User = require('../models/mongo/user'); 
 const auth = require('../middlewares/auth_user');
+const multer = require('multer');
+const path = require('path');
+const upload = multer({dest: path.join(__dirname, '../public/upload')});
+const HOST = process.env.NODE_env === 'production' ? 'http://some.host' : 'http://localhost:3000'
 /* GET users listing. */
 router.route('/').get((req, res, next) => {
   (async () => {
@@ -48,7 +52,7 @@ router.route('/:id').get((req, res, next) => {
   }).catch(e => {
     next(e);
   })
-}).patch(auth(), (req, res, next) => {
+}).patch(auth(), upload.single('avatar'), (req, res, next) => {
   (async() => {
     let update = {};
     if (req.body.name) {
@@ -57,7 +61,11 @@ router.route('/:id').get((req, res, next) => {
     if (req.body.age) {
       update.age = req.body.age;
     }
+    if (req.file) {
+      update.avatar = `/upload/${req.file.filename}`;
+    }
     let user = await User.updateUserById(req.params.id, update);
+    user.avatar = `${HOST}${user.avatar}`;
     return {
       code: 0,
       user
